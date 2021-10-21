@@ -1,0 +1,52 @@
+{
+  "constants": {
+    "G": "6.67"
+  },
+  "bodies": {
+    "sun": {
+      "distance": 0,
+      "size": 139.27,
+      "mass": "1988500.0"
+    },
+    "mercury": {
+      "distance": 0.39,
+      "size": 0.48794,
+      "mass": ".33022"
+    },
+    "venus": {
+      "distance": 0.723,
+      "size": 1.2104,
+      "mass": "4.8685"
+    },
+    "earth": {
+      "distance": 1,
+      "size": 1.2756,
+      "mass": "5.9736"
+    },
+    "mars": {
+      "distance": 1.524,
+      "size": 0.6779,
+      "mass": ".64185"
+    },
+    "jupiter": {
+      "distance": 5.203,
+      "size": 14.2800,
+      "mass": "1898.6"
+    },
+    "saturn": {
+      "distance": 9.539,
+      "size": 12.0660,
+      "mass": "568.46"
+    },
+    "uranus": {
+      "distance": 19.18,
+      "size": 5.1118,
+      "mass": "86.810"
+    },
+    "neptune": {
+      "distance": 30.06,
+      "size": 4.9528,
+      "mass": "102.43"
+    }
+  }
+}
