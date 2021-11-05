@@ -19,9 +19,9 @@ def append_surfs(surf1, surf2, spacing=0, vertical=False):
 
 # Font loading
 fonts = {
-    "l": pygame.freetype.Font("font/nasalization-rg.otf", 72),
-    "m": pygame.freetype.Font("font/nasalization-rg.otf", 36),
-    "s": pygame.freetype.Font("font/nasalization-rg.otf", 18)
+    "l": pygame.freetype.SysFont("Arial", 72),
+    "m": pygame.freetype.SysFont("Arial", 36),
+    "s": pygame.freetype.SysFont("Arial", 18)
 }
 
 def generate_text(string, color=(255, 255, 255), size="s", spacing=0):
