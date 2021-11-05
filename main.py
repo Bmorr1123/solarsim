@@ -30,8 +30,13 @@ class Camera:
         self._scale = scale
         self.tracking = tracking
 
+        self.shake_vector = Vector2()
+        self.shake_amount = 0
+
     def tick(self, delta):
-        pass
+        if self.shake_amount:
+            print("shaking")
+            self.shake_amount = max(self.shake_amount - delta * self.shake_amount, 1)
         if self.tracking:
             self.position = Vector2(self.tracking.position)
 
@@ -39,7 +44,12 @@ class Camera:
         return (position - center) / self._scale + self.position
 
     def render_position(self, position: Vector2, ignore_translation=False):
-        position = (position - self.position) * self._scale + center
+
+        angle = random() * 2 * math.pi
+        shake = self.shake_amount * Vector2(math.cos(angle), math.sin(angle))
+
+        position = (position - self.position) * self._scale + center + shake
+
         return Vector2(position.x, position.y)
 
     def get_scale(self):
@@ -54,6 +64,8 @@ class Camera:
         else:
             self._scale *= (1/2)
 
+    def shake(self, force: float):
+        self.shake_amount += math.sqrt(force) ** 2
 
 class Body:
     def __init__(self, position, velocity, mass, bodies, uuid=None, skip_surf_gen=False):
@@ -85,7 +97,7 @@ class Body:
                 body.ghosted = True
                 self.ghosted = True
 
-            if body != self:
+            if body != self and dir_vec:
                 # print(dir_vec.magnitude())
                 net_force += dir_vec.normalize() * (6.67e3 * 2) * body.mass / dir_vec.magnitude() ** 2
 
@@ -164,7 +176,7 @@ def solarsim():
     prediction_lines = []
 
     while running:
-        delta = clock.tick(125) / 1000
+        delta = clock.tick() / 1000
 
         # Event handling
         clicked = False
@@ -266,8 +278,6 @@ def solarsim():
             camera.position += camera_dir.normalize() * (1 / camera.get_scale()) * delta
 
         # Ticking
-        camera.tick(delta)
-
         if moving:
             new_moving = pygame.mouse.get_pos()
             camera.position -= (Vector2(new_moving) - Vector2(moving)) / camera.get_scale()
@@ -290,7 +300,7 @@ def solarsim():
                 body.ghosted = False
                 body.update_physics()
 
-            for body1, body2 in collisions:
+            for body1, body2 in collisions:  # handling collisions
                 i1, i2 = bodies.index(body1), bodies.index(body2)
                 if i2 < i1:
                     body1, body2 = body2, body1
@@ -303,7 +313,15 @@ def solarsim():
                 new_velocity = (body1.velocity * body1.mass + body2.velocity * body2.mass) / new_mass
                 new_position = (body1.position * body1.mass + body2.position * body2.mass) / new_mass
 
-                bodies.insert(i1, Body(new_position, new_velocity, new_mass, bodies, uuid=body1.uuid))
+                new_body = Body(new_position, new_velocity, new_mass, bodies, uuid=body1.uuid)
+                bodies.insert(i1, new_body)
+
+                if body1 == camera.tracking or body2 == camera.tracking:
+                    camera.tracking = new_body
+
+                camera.shake(body2.mass)
+
+        camera.tick(delta)
 
         # Time management
         time += delta
@@ -321,7 +339,7 @@ def solarsim():
             render_pos = camera.render_position(body.position)
             rad = int(camera.scale(body.radius))
 
-            if render_pos.x - rad < win.get_width() and render_pos.y - rad < win.get_height():
+            if 0 < render_pos.x + rad and render_pos.x - rad < win.get_width() and 0 < render_pos.y + rad and render_pos.y - rad < win.get_height():
 
                 if (Vector2(pygame.mouse.get_pos()) - render_pos).magnitude() < rad + 10:
                     text = body.name_surf
@@ -334,6 +352,7 @@ def solarsim():
                 if rad > 4 * width:
                     win.fill((255, 0, 255))
                 else:
+                    print(render_pos)
                     pygame.gfxdraw.aacircle(win, int(render_pos.x), int(render_pos.y), rad + 10, (255, 255, 255))
                     win.blit(pygame.transform.scale(body_circle, (rad * 2, rad * 2)), render_pos - Vector2(rad, rad))
 
