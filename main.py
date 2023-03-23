@@ -48,7 +48,7 @@ class Camera:
         angle = random() * 2 * math.pi
         shake = self.shake_amount * Vector2(math.cos(angle), math.sin(angle))
 
-        position = (position - self.position) * self._scale + center + shake
+        position = (position - self.position) * self._scale + center  # + shake
 
         return Vector2(position.x, position.y)
 
